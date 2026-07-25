@@ -1,0 +1,6 @@
+@CodeFam.Notification_HostAddress = http://localhost:5074
+
+GET {{CodeFam.Notification_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
