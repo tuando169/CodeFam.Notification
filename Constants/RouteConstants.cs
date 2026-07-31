@@ -12,6 +12,8 @@ namespace CodeFam.Notification.Constants
         {
             public const string Base = Version + "/nofications";
             public const string GetAll = Version;
+            public const string Read = Version;
+            public const string ReadAll = Version + "/all";
         }
     }
 }

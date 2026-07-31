@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace CodeFam.Notification.Repositories;
-
-public class NotificationContext : DbContext
+namespace CodeFam.Notification.Repositories
 {
-    public NotificationContext(DbContextOptions<NotificationContext> options) : base(options)
-    { }
-    public DbSet<CodeFam.Notification.Entities.Notification> Notifications { get; set; } = null!;
+    public class NotificationContext : DbContext
+    {
+        public NotificationContext(DbContextOptions<NotificationContext> options) : base(options)
+        { }
+        public DbSet<CodeFam.Notification.Entities.Notification> Notifications { get; set; } = null!;
+    }
 }

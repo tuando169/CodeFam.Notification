@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CodeFam.Notification")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f11dff6d78e0af20c5342313afc07cffb1a4e9b3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cfdcceb7f6c280fc7ff91eef3859cb14282634a1")]
 [assembly: System.Reflection.AssemblyProductAttribute("CodeFam.Notification")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CodeFam.Notification")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
