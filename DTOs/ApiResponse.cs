@@ -11,7 +11,7 @@ namespace CodeFam.Notification.DTOs
         public int Page { get; set; }
         public int Limit { get; set; }
         public int TotalItems { get; set; }
-        public int TotalPage { get; set; }
+        public int TotalPages { get; set; }
     }
 
     public class ValidationErrorDetail

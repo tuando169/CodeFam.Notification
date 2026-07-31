@@ -5,8 +5,5 @@ using System.Threading.Tasks;
 
 namespace CodeFam.Notification.DTOs
 {
-    public class GetNotificationListRequest
-    {
-        
-    }
+    public record PagedResultDto<T>(T Items, MetaData Meta);
 }

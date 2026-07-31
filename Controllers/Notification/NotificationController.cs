@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using CodeFam.Notification.Constants;
+using CodeFam.Notification.DTOs;
 using CodeFam.Notification.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -21,13 +22,13 @@ namespace CodeFam.Notification.Controllers
         }
 
         [HttpGet(RouteConstants.Notification.GetAll)]
-        public async Task<IActionResult> GetNotificationList([FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public async Task<IActionResult> GetNotificationList([FromQuery] GetNotificationListRequestDto request)
         {
             try
             {
                 Guid userId = Guid.Empty;
-                var result = _service.GetUserNotification(userId, pageNumber, pageSize);
-                return CreateSuccessResponse(result, "Get notification list successfully");
+                var result = await _service.GetUserNotification(userId, request.Page, request.Limit);
+                return CreateSuccessResponse(result.Items, "Get notification list successfully", result.Meta);
             }
             catch (Exception e)
             {

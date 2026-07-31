@@ -4,8 +4,8 @@ namespace CodeFam.Notification.Services
 {
     public interface INotificationService
     {
-        Task<ApiResponse<GetNotificationListResponse>> GetUserNotification(Guid userId, int pageNumber = 1, int pageSize = 10);
-        Task<ApiResponse<bool>> ReadNotification(Guid notifactionId, Guid userId);
-        Task<ApiResponse<bool>> ReadAllNotification(Guid userId);
+        Task<PagedResultDto<List<NotificationItemDto>>> GetUserNotification(Guid userId, int page = 1, int limit = 10);
+        Task<bool> ReadNotification(Guid notifactionId, Guid userId);
+        Task<bool> ReadAllNotification(Guid userId);
     }
 }
