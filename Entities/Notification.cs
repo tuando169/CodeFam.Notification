@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace CodeFam.Notification.Entities
     [Table("notifications")]
     public class Notification
     {
-        [Column("id")] public Guid Id { get; set; }
+        [Key] [Column("id")] public Guid Id { get; set; }
         [Column("user_id")] public Guid UserId { get; set; }
         [Column("channel")] public int Channel { get; set; }
         [Column("type")] public int Type { get; set; }

@@ -7,5 +7,7 @@ namespace CodeFam.Notification.Services
         Task<PagedResultDto<List<NotificationItemDto>>> GetUserNotification(Guid userId, int page = 1, int limit = 10);
         Task<bool> ReadNotification(Guid notifactionId, Guid userId);
         Task<bool> ReadAllNotification(Guid userId);
+
+        Task<bool> CreateNotification(Guid userId, int channel, int type, string title, string content);
     }
 }

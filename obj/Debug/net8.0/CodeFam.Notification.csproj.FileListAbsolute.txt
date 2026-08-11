@@ -31,3 +31,16 @@ D:\Workspace\code-fam\CodeFam.Notification\obj\Debug\net8.0\refint\CodeFam.Notif
 D:\Workspace\code-fam\CodeFam.Notification\obj\Debug\net8.0\CodeFam.Notification.pdb
 D:\Workspace\code-fam\CodeFam.Notification\obj\Debug\net8.0\CodeFam.Notification.genruntimeconfig.cache
 D:\Workspace\code-fam\CodeFam.Notification\obj\Debug\net8.0\ref\CodeFam.Notification.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.InMemory.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.Extensions.Caching.Memory.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Npgsql.dll
+D:\Workspace\code-fam\CodeFam.Notification\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+D:\Workspace\code-fam\CodeFam.Notification\obj\Debug\net8.0\CodeFam.Notification.sourcelink.json
