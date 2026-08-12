@@ -21,9 +21,9 @@ public class TestController : BaseApiController
         try
         {
             var userId = Guid.Empty;
-            await _service.CreateNotification(userId, request.Channel, request.Type, request.Title,
+            var notification = await _service.CreateNotification(userId, request.Channel, request.Type, request.Title,
                 request.Content);
-            return CreateSuccessResponse(true, "Create notification successfully");
+            return CreateSuccessResponse(notification, "Create notification successfully");
         }
         catch (Exception ex)
         {

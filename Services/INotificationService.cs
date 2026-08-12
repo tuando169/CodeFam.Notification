@@ -8,6 +8,6 @@ namespace CodeFam.Notification.Services
         Task<bool> ReadNotification(Guid notifactionId, Guid userId);
         Task<bool> ReadAllNotification(Guid userId);
 
-        Task<bool> CreateNotification(Guid userId, int channel, int type, string title, string content);
+        Task<NotificationItemDto> CreateNotification(Guid userId, int channel, int type, string title, string content);
     }
 }

@@ -8,10 +8,12 @@ namespace CodeFam.Notification.Controllers;
 public class NotificationController : BaseApiController
 {
     private readonly INotificationService _service;
+    private readonly ILogger<NotificationController> _logger;
 
-    public NotificationController(INotificationService service)
+    public NotificationController(INotificationService service, ILogger<NotificationController> logger)
     {
         _service = service;
+        this._logger = logger;
     }
 
     [HttpGet(RouteConstants.Notification.GetAll)]

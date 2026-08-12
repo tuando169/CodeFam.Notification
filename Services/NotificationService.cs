@@ -7,13 +7,20 @@ namespace CodeFam.Notification.Services
 {
     public class NotificationService : INotificationService
     {
-        private readonly IDbContextFactory<NotificationContext> contextFactory;
-        private readonly ILogger<NotificationService> logger;
+        private readonly IDbContextFactory<NotificationContext> _contextFactory;
+        private readonly ILogger<NotificationService> _logger;
+
+        public NotificationService(IDbContextFactory<NotificationContext> contextFactory,
+            ILogger<NotificationService> logger)
+        {
+            this._contextFactory = contextFactory;
+            this._logger = logger;
+        }
 
         public async Task<PagedResultDto<List<NotificationItemDto>>> GetUserNotification(Guid userId, int page = 1,
             int limit = 10)
         {
-            await using var context = await contextFactory.CreateDbContextAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
             if (page < 1) page = 1;
             if (limit < 1) limit = 10;
             var allNotifications =
@@ -30,7 +37,7 @@ namespace CodeFam.Notification.Services
 
         public async Task<bool> ReadNotification(Guid userId, Guid notificationId)
         {
-            await using var context = await contextFactory.CreateDbContextAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
             var foundNotification = await context.Notifications
                 .Where(n => n.UserId == userId && n.Id == notificationId).FirstOrDefaultAsync();
             if (foundNotification == null) throw new Exception(ErrorCodesConstants.NotFound.Code);
@@ -42,7 +49,7 @@ namespace CodeFam.Notification.Services
 
         public async Task<bool> ReadAllNotification(Guid userId)
         {
-            await using var context = await contextFactory.CreateDbContextAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
             await context.Notifications.Where(n => n.UserId == userId && !n.IsRead)
                 .ExecuteUpdateAsync(noti => noti
                     .SetProperty(n => n.IsRead, true)
@@ -50,10 +57,11 @@ namespace CodeFam.Notification.Services
             return true;
         }
 
-        public async Task<bool> CreateNotification(Guid userId, int channel, int type, string title, string content)
+        public async Task<NotificationItemDto> CreateNotification(Guid userId, int channel, int type, string title,
+            string content)
         {
-            await using var context = await contextFactory.CreateDbContextAsync();
-            var newNotification = new Entities.Notification()
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var entity = new Entities.Notification()
             {
                 UserId = userId,
                 Content = content,
@@ -63,15 +71,17 @@ namespace CodeFam.Notification.Services
                 Title = title,
                 Type = type
             };
-            await context.Notifications.AddAsync(newNotification);
-            return true;
+            context.Notifications.Add(entity);
+            await context.SaveChangesAsync();
+            return new NotificationItemDto(entity.Id, entity.UserId, entity.Channel, entity.Type, entity.Title,
+                entity.Content, entity.IsRead, entity.ReadAt, entity.CreatedAt, entity.UpdatedAt);
         }
 
         public async Task<bool> SendEmail(Guid userId, int channel, int type, string title, string content)
         {
             // TODO: get user email through user service
             // TODO: use email package to send email
-            await using var context = await contextFactory.CreateDbContextAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
             return true;
         }
     }
