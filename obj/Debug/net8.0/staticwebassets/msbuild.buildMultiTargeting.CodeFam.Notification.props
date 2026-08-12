@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\CodeFam.Notification.props" />
-</Project>
