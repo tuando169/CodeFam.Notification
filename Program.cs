@@ -25,9 +25,29 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    
+    // 💡 IN THÊM LINK SWAGGER RA CONSOLE KHI CHẠY DEVELOPMENT
+    app.Lifetime.ApplicationStarted.Register(() =>
+    {
+        var addresses = app.Services.GetRequiredService<Microsoft.AspNetCore.Hosting.Server.IServer>()
+            .Features.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>()?.Addresses;
+
+        if (addresses != null)
+        {
+            foreach (var address in addresses)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"--> Swagger UI is available at: {address}/swagger");
+                Console.ResetColor();
+            }
+        }
+    });
+}
+else
+{
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
