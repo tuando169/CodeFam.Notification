@@ -1,4 +1,5 @@
 using CodeFam.Notification.DTOs;
+using CodeFam.Notification.DTOs.Notification;
 
 namespace CodeFam.Notification.Services
 {

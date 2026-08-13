@@ -11,6 +11,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContextFactory<NotificationContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddSingleton<INotificationService, NotificationService>();

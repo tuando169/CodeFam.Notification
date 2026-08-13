@@ -1,5 +1,6 @@
 using CodeFam.Notification.Constants;
 using CodeFam.Notification.DTOs;
+using CodeFam.Notification.DTOs.Notification;
 using CodeFam.Notification.Repositories;
 using Microsoft.EntityFrameworkCore;
 
