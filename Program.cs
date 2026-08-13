@@ -1,5 +1,7 @@
+using CodeFam.Notification.Helpers;
 using CodeFam.Notification.Repositories;
 using CodeFam.Notification.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,19 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+
+    options.TokenValidationParameters = JwtValidationHelper.GetTokenValidationParameters(builder.Configuration);
+});
+
 
 builder.Services.AddDbContextFactory<NotificationContext>(options => options.UseNpgsql(connectionString));
 
@@ -25,7 +40,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
+
     // 💡 IN THÊM LINK SWAGGER RA CONSOLE KHI CHẠY DEVELOPMENT
     app.Lifetime.ApplicationStarted.Register(() =>
     {
@@ -48,6 +63,8 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseAuthentication(); // 1. Xác thực (Đọc và decode Token)
+app.UseAuthorization(); // 2. Phân quyền (Kiểm tra thẻ [Authorize])
 app.MapControllers();
 
 app.Run();
