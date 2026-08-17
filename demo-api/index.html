@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Notification Tester & Simulator</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-full font-sans antialiased overflow-hidden flex flex-col">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-6 py-4 flex items-center justify-between z-40 shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+          Notification API Tester
+        </h1>
+        <p class="text-xs text-slate-500">Test API notifications with live visual simulators</p>
+      </div>
+    </div>
+
+    <!-- Right Header Controls -->
+    <div class="flex items-center space-x-6">
+      <!-- Mock API Toggle -->
+      <div class="flex items-center bg-slate-950 border border-slate-800 rounded-full px-4 py-2 space-x-3 shadow-inner">
+        <span class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Mock Mode</span>
+        <button id="mockModeToggle" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-slate-700" role="switch" aria-checked="false">
+          <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0" id="mockModeSlider"></span>
+        </button>
+      </div>
+
+      <!-- System Notification Bell Icon -->
+      <div class="relative" id="systemBellContainer">
+        <button id="bellButton" class="relative p-2.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition duration-200 focus:outline-none">
+          <svg id="bellSvg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <!-- Unread Dot Badge -->
+          <span id="bellBadge" class="absolute top-1 right-1 w-3 h-3 bg-rose-500 rounded-full border border-slate-900 hidden scale-100 transition-all duration-300"></span>
+        </button>
+
+        <!-- Dropdown Menu (System Notifications Dropdown) -->
+        <div id="bellDropdown" class="absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 hidden z-50 transform origin-top-right transition duration-200 opacity-0 scale-95">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-slate-800">
+            <span class="font-bold text-slate-200">System Notifications</span>
+            <button id="clearSystemNotifications" class="text-xs text-brand-500 hover:text-brand-400 font-semibold">Clear</button>
+          </div>
+          <div id="systemDropdownList" class="max-h-72 overflow-y-auto divide-y divide-slate-800/50">
+            <!-- Items rendered via JS -->
+            <div class="px-4 py-6 text-center text-slate-500 text-sm">
+              No system notifications yet.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Workspace -->
+  <main class="flex-1 flex overflow-hidden">
+    
+    <!-- Left Workspace Pane (Config & Testing Forms) -->
+    <section class="w-1/2 flex flex-col border-r border-slate-800 h-full overflow-hidden bg-slate-950">
+      
+      <!-- API Global Host Configuration -->
+      <div class="p-5 border-b border-slate-800 bg-slate-900/30">
+        <label for="apiHostInput" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Base API Host</label>
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 text-sm font-mono">
+              host:
+            </span>
+            <input type="text" id="apiHostInput" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-14 pr-4 py-2.5 font-mono text-sm text-slate-200 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition duration-200" placeholder="https://api.yourdomain.com">
+          </div>
+          <button id="saveSettingsBtn" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl flex items-center space-x-1.5 transition duration-200 shadow-lg shadow-brand-500/10">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            <span>Lưu</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Buttons for APIs -->
+      <div class="border-b border-slate-800 bg-slate-900/10 px-5 flex space-x-1 shrink-0 overflow-x-auto">
+        <button data-tab="tab-list" class="api-tab-btn active border-b-2 border-transparent text-slate-400 hover:text-slate-200 px-4 py-3 text-sm font-semibold transition-all">
+          1. Get List
+        </button>
+        <button data-tab="tab-read" class="api-tab-btn border-b-2 border-transparent text-slate-400 hover:text-slate-200 px-4 py-3 text-sm font-semibold transition-all">
+          2. Read One
+        </button>
+        <button data-tab="tab-read-all" class="api-tab-btn border-b-2 border-transparent text-slate-400 hover:text-slate-200 px-4 py-3 text-sm font-semibold transition-all">
+          3. Read All
+        </button>
+        <button data-tab="tab-create" class="api-tab-btn border-b-2 border-transparent text-slate-400 hover:text-slate-200 px-4 py-3 text-sm font-semibold transition-all">
+          4. Create Notification
+        </button>
+      </div>
+
+      <!-- Tab Contents Area -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-5">
+        
+        <!-- Tab: Get List -->
+        <div id="tab-list" class="api-tab-content space-y-4">
+          <div class="bg-slate-900/40 p-4 border border-slate-800 rounded-xl space-y-3">
+            <h3 class="text-sm font-semibold text-slate-200">API Path Configuration</h3>
+            <div>
+              <label for="overrideListPath" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">Path Override</label>
+              <input type="text" id="overrideListPath" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500" placeholder="/api/notifications">
+            </div>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <div>
+                <label for="paramPage" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">page (Query param)</label>
+                <input type="number" id="paramPage" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500" value="1">
+              </div>
+              <div>
+                <label for="paramLimit" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">limit (Query param)</label>
+                <input type="number" id="paramLimit" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500" value="10">
+              </div>
+            </div>
+          </div>
+          
+          <button id="sendListRequestBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-500/10 flex items-center justify-center space-x-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>SEND GET LIST REQUEST</span>
+          </button>
+        </div>
+
+        <!-- Tab: Read One -->
+        <div id="tab-read" class="api-tab-content space-y-4 hidden">
+          <div class="bg-slate-900/40 p-4 border border-slate-800 rounded-xl space-y-3">
+            <h3 class="text-sm font-semibold text-slate-200">API Path Configuration</h3>
+            <div>
+              <label for="overrideReadPath" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">Path Override (use {id} placeholder)</label>
+              <input type="text" id="overrideReadPath" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500" placeholder="/api/notifications/{id}/read">
+            </div>
+            <div class="pt-2">
+              <label for="readNotiId" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">Notification ID</label>
+              <input type="text" id="readNotiId" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500" placeholder="e.g. 1, 2, noti_123">
+            </div>
+          </div>
+          
+          <button id="sendReadRequestBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-500/10 flex items-center justify-center space-x-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>SEND READ NOTIFICATION REQUEST</span>
+          </button>
+        </div>
+
+        <!-- Tab: Read All -->
+        <div id="tab-read-all" class="api-tab-content space-y-4 hidden">
+          <div class="bg-slate-900/40 p-4 border border-slate-800 rounded-xl space-y-3">
+            <h3 class="text-sm font-semibold text-slate-200">API Path Configuration</h3>
+            <div>
+              <label for="overrideReadAllPath" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">Path Override</label>
+              <input type="text" id="overrideReadAllPath" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500" placeholder="/api/notifications/read-all">
+            </div>
+            <p class="text-slate-500 text-xs italic">Không truyền params. Đánh dấu tất cả thông báo là đã đọc.</p>
+          </div>
+          
+          <button id="sendReadAllRequestBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-500/10 flex items-center justify-center space-x-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>SEND READ ALL REQUEST</span>
+          </button>
+        </div>
+
+        <!-- Tab: Create Notification -->
+        <div id="tab-create" class="api-tab-content space-y-4 hidden">
+          <div class="bg-slate-900/40 p-4 border border-slate-800 rounded-xl space-y-3">
+            <h3 class="text-sm font-semibold text-slate-200">API Path Configuration</h3>
+            <div>
+              <label for="overrideCreatePath" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">Path Override</label>
+              <input type="text" id="overrideCreatePath" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500" placeholder="/api/notifications">
+            </div>
+            
+            <div class="pt-2">
+              <div class="flex items-center justify-between mb-1">
+                <label for="createPayload" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wide">JSON Payload</label>
+                <!-- Quick Templates -->
+                <div class="flex space-x-1.5">
+                  <button type="button" data-template="SYSTEM" class="payload-template-btn px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition">SYSTEM</button>
+                  <button type="button" data-template="SMS" class="payload-template-btn px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition">SMS</button>
+                  <button type="button" data-template="EMAIL" class="payload-template-btn px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition">EMAIL</button>
+                  <button type="button" data-template="PUSH" class="payload-template-btn px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition">PUSH</button>
+                </div>
+              </div>
+              <textarea id="createPayload" rows="7" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500" placeholder="Enter JSON payload..."></textarea>
+            </div>
+          </div>
+          
+          <button id="sendCreateRequestBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-500/10 flex items-center justify-center space-x-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>SEND CREATE NOTIFICATION REQUEST</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Raw API Console Log Panel (Fixed Height bottom left) -->
+      <div class="h-64 border-t border-slate-800 bg-slate-900/60 flex flex-col shrink-0">
+        <div class="flex items-center justify-between px-5 py-2.5 border-b border-slate-800 bg-slate-900/80">
+          <div class="flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-500" id="statusIndicator"></span>
+            <span class="text-xs font-bold text-slate-300 tracking-wide uppercase">Console Log</span>
+          </div>
+          <div class="flex items-center space-x-3 text-[10px] font-mono text-slate-500">
+            <span id="responseStatus">Status: --</span>
+            <span id="responseTime">Time: -- ms</span>
+          </div>
+        </div>
+        <div class="flex-1 p-3 overflow-auto font-mono text-xs text-slate-300 bg-slate-950/70" id="jsonConsole">
+          <span class="text-slate-600 italic">// Gửi request để xem kết quả trả về tại đây...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Workspace Pane (Visual Renderers & Simulator Devices) -->
+    <section class="w-1/2 flex flex-col h-full bg-slate-900 overflow-hidden">
+      
+      <!-- Simulator Navigation Switcher -->
+      <div class="bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between shrink-0">
+        <div class="flex space-x-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button data-sim-tab="sim-list" class="sim-tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all bg-slate-800 text-slate-200">
+            UI List view
+          </button>
+          <button data-sim-tab="sim-phone" class="sim-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-slate-200 transition-all">
+            Phone Mockup
+          </button>
+          <button data-sim-tab="sim-gmail" class="sim-tab-btn px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-slate-200 transition-all">
+            Gmail Mockup
+          </button>
+        </div>
+        <span class="text-[11px] font-semibold text-slate-400 tracking-wider uppercase bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+          Live Simulator
+        </span>
+      </div>
+
+      <!-- Simulator Screens Container -->
+      <div class="flex-1 overflow-y-auto p-6 flex justify-center items-start bg-gradient-to-b from-slate-900 to-slate-950">
+        
+        <!-- Screen 1: Notification Card Render View -->
+        <div id="sim-list" class="sim-content-pane w-full max-w-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-slate-200 flex items-center space-x-2">
+              <span>Danh sách thông báo kết quả</span>
+              <span id="renderedNotiCount" class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700">0</span>
+            </h2>
+            <div class="flex items-center space-x-1.5 text-xs text-slate-500">
+              <span class="w-3 h-3 rounded bg-blue-500/20 border border-blue-500"></span> <span>SYS</span>
+              <span class="w-3 h-3 rounded bg-amber-500/20 border border-amber-500"></span> <span>SMS</span>
+              <span class="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500"></span> <span>EMAIL</span>
+              <span class="w-3 h-3 rounded bg-purple-500/20 border border-purple-500"></span> <span>PUSH</span>
+            </div>
+          </div>
+          
+          <div id="renderedNotificationList" class="space-y-3">
+            <!-- Custom UI Notification list items rendered by JavaScript -->
+            <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 text-center text-slate-500 text-sm">
+              <div class="w-12 h-12 rounded-full bg-slate-950 flex items-center justify-center mx-auto mb-3 border border-slate-800">
+                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              Nhấp gửi "GET LIST REQUEST" hoặc bật "Mock Mode" để tải danh sách thông báo.
+            </div>
+          </div>
+        </div>
+
+        <!-- Screen 2: Mobile Phone Mockup (Push/SMS Simulator) -->
+        <div id="sim-phone" class="sim-content-pane hidden py-2 select-none">
+          <!-- Smartphone Container -->
+          <div class="relative mx-auto w-[360px] h-[720px] bg-slate-900 rounded-[50px] border-[12px] border-slate-800 shadow-2xl overflow-hidden ring-4 ring-slate-800/20">
+            <!-- Camera Notch -->
+            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 h-6 w-32 bg-slate-800 rounded-b-2xl z-30 flex items-center justify-center">
+              <div class="w-3 h-3 rounded-full bg-slate-950 mr-2"></div>
+              <div class="w-10 h-1 bg-slate-900 rounded-full"></div>
+            </div>
+
+            <!-- Phone Top Status Bar -->
+            <div class="absolute top-1 left-0 right-0 px-6 py-1.5 flex justify-between items-center text-[10px] font-bold text-white z-20">
+              <span id="phoneTime">09:41</span>
+              <div class="flex items-center space-x-1.5">
+                <!-- Cell Signal Icon -->
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3c-1.2 0-2.4.2-3.6.7L18.7 14c.5-1.2.7-2.4.7-3.6 0-4.4-3.6-8-8-8zM3 12c0 4.4 3.6 8 8 8 1.2 0 2.4-.2 3.6-.7L4.3 9.6C3.8 10.8 3 12 3 12z"/></svg>
+                <!-- Wifi Icon -->
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.111a3 3 0 014.242 0M5.283 13.283a7 7 0 019.899 0M2.454 10.454a11 11 0 0115.548 0" /></svg>
+                <!-- Battery Icon -->
+                <div class="w-5 h-2.5 border border-white rounded-sm p-0.5 flex items-center">
+                  <div class="w-3 h-full bg-white rounded-2xs"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Simulated Screens Inside Phone -->
+            <div class="relative w-full h-full bg-slate-950 flex flex-col font-sans">
+              
+              <!-- Sub-view 1: Lockscreen (Default for Push Notifications) -->
+              <div id="phoneLockScreen" class="absolute inset-0 bg-cover bg-center flex flex-col justify-between p-6 pb-8 transition-opacity duration-300" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=360&auto=format&fit=crop');">
+                <!-- Clock Widget -->
+                <div class="mt-12 text-center text-white">
+                  <h3 id="lockscreenTime" class="text-6xl font-light tracking-tight">09:41</h3>
+                  <p id="lockscreenDate" class="text-xs font-semibold uppercase tracking-wider text-slate-300 mt-1">Monday, August 17</p>
+                </div>
+
+                <!-- Simulated Push Notification Banner Container -->
+                <div id="phonePushBannerContainer" class="flex-1 flex flex-col justify-start mt-8 space-y-3 overflow-y-auto pt-4 relative">
+                  <!-- Push Banner (Rendered via JS) -->
+                </div>
+
+                <!-- Unlock Swipe Bar -->
+                <div class="text-center">
+                  <div class="w-24 h-1 bg-white/70 rounded-full mx-auto mb-2 animate-pulse"></div>
+                  <span class="text-[10px] font-semibold text-white/50 tracking-widest uppercase">Swipe up to unlock</span>
+                </div>
+              </div>
+
+              <!-- Sub-view 2: SMS Conversation view -->
+              <div id="phoneSmsScreen" class="absolute inset-0 bg-[#0f0f12] flex flex-col transition-opacity duration-300 opacity-0 pointer-events-none z-10">
+                <!-- SMS Contact Header -->
+                <div class="bg-slate-900/90 border-b border-slate-800 pt-8 pb-3 px-4 flex items-center space-x-3">
+                  <button id="closeSmsView" class="text-slate-400 hover:text-white p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <div class="w-9 h-9 rounded-full bg-amber-500/20 border border-amber-500 flex items-center justify-center font-bold text-amber-500 text-sm">
+                    NB
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white">Noti Bot (SMS)</h4>
+                    <span class="text-[9px] text-emerald-500 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> Hoạt động</span>
+                  </div>
+                </div>
+
+                <!-- SMS Messages List -->
+                <div id="smsConversationBody" class="flex-1 p-4 overflow-y-auto space-y-3 flex flex-col justify-end">
+                  <!-- System date divider -->
+                  <div class="text-center my-2">
+                    <span class="text-[9px] bg-slate-900 border border-slate-800 text-slate-500 px-2 py-0.5 rounded-full">Hôm nay</span>
+                  </div>
+                  
+                  <div class="sms-bubble received max-w-[80%] bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-sm text-slate-300 text-xs self-start">
+                    Chào bạn! Đây là trình mô phỏng nhận tin nhắn SMS. Gửi tạo thông báo SMS bên bảng trái để test.
+                  </div>
+                </div>
+
+                <!-- SMS Message Input Box (disabled mock input) -->
+                <div class="p-3 border-t border-slate-800 bg-slate-900/50 flex gap-2 items-center">
+                  <input type="text" disabled placeholder="Tin nhắn văn bản..." class="flex-1 bg-slate-950 border border-slate-800 rounded-full px-4 py-1.5 text-xs text-slate-500 focus:outline-none">
+                  <button class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-slate-950 font-bold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Screen 3: Gmail Mockup (Email Simulator) -->
+        <div id="sim-gmail" class="sim-content-pane hidden w-full max-w-4xl bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[560px]">
+          <!-- Gmail Header / Top bar -->
+          <div class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <!-- Gmail Brand Logo Icon -->
+              <div class="w-8 h-8 rounded-lg bg-rose-600 flex items-center justify-center text-white font-black text-sm">
+                M
+              </div>
+              <span class="text-sm font-bold text-slate-200 tracking-tight">Google Mail Mock</span>
+            </div>
+            
+            <!-- Mock Gmail Search Box -->
+            <div class="w-96 relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
+              <input type="text" placeholder="Tìm kiếm trong thư..." disabled class="w-full bg-slate-950 border border-slate-800/80 rounded-lg pl-9 pr-4 py-1.5 text-xs text-slate-500 focus:outline-none">
+            </div>
+
+            <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">
+              G
+            </div>
+          </div>
+
+          <!-- Gmail Main Layout Split -->
+          <div class="flex-1 flex overflow-hidden">
+            <!-- Sidebar -->
+            <aside class="w-44 border-r border-slate-800 bg-slate-900/40 p-2 space-y-1 select-none flex flex-col justify-between shrink-0">
+              <div class="space-y-1">
+                <!-- Compose button -->
+                <button class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 px-3 rounded-full mb-3 shadow-lg shadow-rose-500/10 flex items-center justify-center space-x-1.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Soạn thư</span>
+                </button>
+                <div class="bg-rose-500/10 text-rose-400 text-xs font-bold px-3 py-2 rounded-lg flex items-center justify-between">
+                  <span class="flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+                    <span>Hộp thư đến</span>
+                  </span>
+                  <span id="gmailBadge" class="bg-rose-600 text-white font-bold text-[9px] px-1.5 py-0.5 rounded-full hidden">0</span>
+                </div>
+                <div class="text-slate-400 hover:bg-slate-800 text-xs px-3 py-2 rounded-lg flex items-center space-x-2 transition cursor-not-allowed">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                  <span>Có gắn dấu sao</span>
+                </div>
+                <div class="text-slate-400 hover:bg-slate-800 text-xs px-3 py-2 rounded-lg flex items-center space-x-2 transition cursor-not-allowed">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <span>Đã tạm ẩn</span>
+                </div>
+                <div class="text-slate-400 hover:bg-slate-800 text-xs px-3 py-2 rounded-lg flex items-center space-x-2 transition cursor-not-allowed">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                  <span>Đã gửi</span>
+                </div>
+              </div>
+              <div class="text-[10px] text-slate-600 px-3 py-2">
+                Dung lượng: 0.1 GB / 15 GB
+              </div>
+            </aside>
+
+            <!-- Main Content Area: Inbox list OR Email details -->
+            <div class="flex-1 bg-slate-950 flex flex-col overflow-hidden relative">
+              
+              <!-- View A: Inbox List View -->
+              <div id="gmailInboxListView" class="absolute inset-0 flex flex-col overflow-hidden">
+                <!-- Mini controls -->
+                <div class="p-2 border-b border-slate-800 flex items-center justify-between bg-slate-900/10">
+                  <div class="flex items-center space-x-4">
+                    <input type="checkbox" disabled class="rounded border-slate-800 bg-slate-950 text-rose-600">
+                    <button class="text-slate-400 hover:text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 4.75" /></svg></button>
+                  </div>
+                  <span class="text-[10px] text-slate-500">1 - 5 trong số 100</span>
+                </div>
+
+                <!-- Inbox Mail Rows -->
+                <div id="gmailMailRows" class="flex-1 overflow-y-auto divide-y divide-slate-800/60">
+                  <!-- Rendered dynamically, showing fallback starting state -->
+                  <div class="px-4 py-8 text-center text-slate-500 text-xs">
+                    Không có email mới. Sử dụng tab "Create Notification" gửi một EMAIL notification để hiển thị thư.
+                  </div>
+                </div>
+              </div>
+
+              <!-- View B: Mail Detail Viewer Panel (hidden by default) -->
+              <div id="gmailMailDetailView" class="absolute inset-0 bg-slate-950 flex flex-col overflow-hidden transition-all duration-300 translate-x-full z-20">
+                <!-- Detail Header controls -->
+                <div class="p-3 border-b border-slate-800 flex items-center space-x-4 bg-slate-900/10">
+                  <button id="closeGmailMail" class="text-slate-400 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                  </button>
+                  <span class="text-xs text-slate-400 font-medium">Quay lại danh sách</span>
+                </div>
+
+                <!-- Email Full Content -->
+                <div id="gmailMailContent" class="flex-1 p-6 overflow-y-auto space-y-6">
+                  <!-- subject -->
+                  <h2 id="gmailSubject" class="text-lg font-bold text-slate-200">
+                    Subject Line Placeholder
+                  </h2>
+
+                  <!-- Sender and To fields -->
+                  <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-9 h-9 rounded-full bg-rose-500/20 border border-rose-500 text-rose-500 flex items-center justify-center font-bold text-sm">
+                        NS
+                      </div>
+                      <div>
+                        <div class="flex items-center space-x-2">
+                          <span id="gmailSenderName" class="text-xs font-bold text-slate-200">Notification Service</span>
+                          <span id="gmailSenderEmail" class="text-[10px] text-slate-500 font-mono">&lt;noreply@service.com&gt;</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400">tới tôi</p>
+                      </div>
+                    </div>
+                    <span id="gmailDate" class="text-[10px] text-slate-500">17 thg 8, 2026, 12:45</span>
+                  </div>
+
+                  <!-- HTML/Text email content body -->
+                  <div id="gmailBody" class="text-sm text-slate-300 leading-relaxed font-sans bg-slate-900/30 p-5 rounded-2xl border border-slate-800/80">
+                    Email content body.
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Script links -->
+  <script src="app.js"></script>
+</body>
+</html>

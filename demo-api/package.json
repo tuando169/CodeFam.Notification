@@ -1,0 +1,14 @@
+{
+  "name": "notification-api-tester",
+  "version": "1.0.0",
+  "description": "API Tester and Visual Simulator for Notifications",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite --port 5173",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

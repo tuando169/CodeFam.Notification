@@ -1,0 +1,154 @@
+/* CSS Variables & Global Resets */
+:root {
+  --scrollbar-track: #09090b;
+  --scrollbar-thumb: #27272a;
+  --scrollbar-thumb-hover: #3f3f46;
+}
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Tab Activations */
+.api-tab-btn.active {
+  color: #0ea5e9;
+  border-color: #0ea5e9;
+  background-color: rgba(14, 165, 233, 0.05);
+}
+
+/* Custom Animations */
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+  20%, 40%, 60%, 80% { transform: rotate(10deg); }
+}
+
+.shake-bell {
+  animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes pulse-red {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(244, 63, 94, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+}
+
+.pulse-dot {
+  animation: pulse-red 2s infinite;
+}
+
+/* Mobile Push Notification Animation */
+@keyframes push-slide-down {
+  0% {
+    transform: translateY(-120%) scale(0.9);
+    opacity: 0;
+  }
+  15% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  85% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120%) scale(0.95);
+    opacity: 0;
+  }
+}
+
+.push-notification-banner {
+  animation: push-slide-down 5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Notification Border Styling */
+.channel-SYSTEM {
+  border-left-width: 4px;
+  border-left-color: #3b82f6; /* Blue */
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.04) 0%, rgba(15, 23, 42, 0.3) 100%);
+}
+.channel-EMAIL {
+  border-left-width: 4px;
+  border-left-color: #10b981; /* Emerald */
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.04) 0%, rgba(15, 23, 42, 0.3) 100%);
+}
+.channel-SMS {
+  border-left-width: 4px;
+  border-left-color: #f59e0b; /* Amber */
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.04) 0%, rgba(15, 23, 42, 0.3) 100%);
+}
+.channel-PUSH {
+  border-left-width: 4px;
+  border-left-color: #8b5cf6; /* Purple */
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.04) 0%, rgba(15, 23, 42, 0.3) 100%);
+}
+
+/* Phone Simulator Custom Style Tweaks */
+#phoneLockScreen {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.sms-bubble {
+  position: relative;
+  word-wrap: break-word;
+  animation: message-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes message-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.sms-bubble.sent {
+  align-self: flex-end;
+  background-color: #2563eb;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+/* Gmail Styling UI */
+.gmail-row-unread {
+  background-color: rgba(255, 255, 255, 0.02);
+  font-weight: 700;
+  border-left: 3px solid #f43f5e;
+}
+
+.gmail-row-read {
+  background-color: transparent;
+  font-weight: 400;
+  border-left: 3px solid transparent;
+}
+
+/* JSON syntax styling in logs */
+.json-key { color: #f472b6; }
+.json-string { color: #34d399; }
+.json-number { color: #fbbf24; }
+.json-boolean { color: #60a5fa; }
+.json-null { color: #a1a1aa; }
+
+/* Interactive items list */
+.noti-card-item {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.noti-card-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+}
