@@ -1,5 +1,6 @@
 using CodeFam.Notification.DTOs;
 using CodeFam.Notification.DTOs.Notification;
+using CodeFam.Notification.Entities;
 
 namespace CodeFam.Notification.Services;
 
@@ -9,5 +10,5 @@ public interface INotificationService
     Task<bool> ReadNotification(Guid notificationId, Guid userId);
     Task<bool> ReadAllNotification(Guid userId);
 
-    Task<NotificationItemDto> CreateNotification(Guid userId, int channel, int type, string title, string content);
+    Task<NotificationItemDto> CreateNotification(Guid userId, NotificationChannelEnum channel, int type, string title, string content);
 }

@@ -31,7 +31,7 @@ namespace CodeFam.Notification.Migrations
 
                     b.Property<int>("Channel")
                         .HasColumnType("integer")
-                        .HasColumnName("channel");
+                        .HasColumnName("channelEnum");
 
                     b.Property<string>("Content")
                         .IsRequired()

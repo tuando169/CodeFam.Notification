@@ -1,6 +1,8 @@
 using CodeFam.Notification.Helpers;
 using CodeFam.Notification.Repositories;
 using CodeFam.Notification.Services;
+using CodeFam.Notification.Services.Email;
+using CodeFam.Notification.Services.SMS;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -57,6 +59,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContextFactory<NotificationContext>(options => options.UseNpgsql(connectionString));
 
+builder.Services.AddSingleton<ISmsService, SmsService>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<INotificationService, NotificationService>();
 
 builder.Services.AddControllers();

@@ -1,9 +1,11 @@
+using CodeFam.Notification.Entities;
+
 namespace CodeFam.Notification.DTOs.Notification;
 
 public record NotificationItemDto(
     Guid Id,
     Guid UserId,
-    int Channel,
+    NotificationChannelEnum ChannelEnum,
     int Type,
     string Title,
     string Content,

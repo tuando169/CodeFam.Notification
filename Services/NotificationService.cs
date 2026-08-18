@@ -1,7 +1,10 @@
 using CodeFam.Notification.Constants;
 using CodeFam.Notification.DTOs;
 using CodeFam.Notification.DTOs.Notification;
+using CodeFam.Notification.Entities;
 using CodeFam.Notification.Repositories;
+using CodeFam.Notification.Services.Email;
+using CodeFam.Notification.Services.SMS;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeFam.Notification.Services
@@ -10,12 +13,16 @@ namespace CodeFam.Notification.Services
     {
         private readonly IDbContextFactory<NotificationContext> _contextFactory;
         private readonly ILogger<NotificationService> _logger;
+        private readonly IEmailService _emailService;
+        private readonly ISmsService _smsService;
 
         public NotificationService(IDbContextFactory<NotificationContext> contextFactory,
-            ILogger<NotificationService> logger)
+            ILogger<NotificationService> logger, IEmailService emailService, ISmsService smsService)
         {
-            this._contextFactory = contextFactory;
-            this._logger = logger;
+            _contextFactory = contextFactory;
+            _logger = logger;
+            _emailService = emailService;
+            _smsService = smsService;
         }
 
         public async Task<PagedResultDto<List<NotificationItemDto>>> GetUserNotification(Guid userId, int page = 1,
@@ -25,7 +32,9 @@ namespace CodeFam.Notification.Services
             if (page < 1) page = 1;
             if (limit < 1) limit = 10;
             var allNotifications =
-                await context.Notifications.AsNoTracking().Where(n => n.UserId == userId).ToListAsync();
+                await context.Notifications.AsNoTracking().Where(n =>
+                    n.UserId == userId && n.Channel == NotificationChannelEnum.System &&
+                    n.Channel == NotificationChannelEnum.Push).ToListAsync();
             var totalItems = allNotifications.Count();
             var totalPages = (int)Math.Ceiling((double)totalItems / limit);
             var items = allNotifications.OrderByDescending(n => n.CreatedAt).Skip((page - 1) * limit).Take(limit)
@@ -58,7 +67,8 @@ namespace CodeFam.Notification.Services
             return true;
         }
 
-        public async Task<NotificationItemDto> CreateNotification(Guid userId, int channel, int type, string title,
+        public async Task<NotificationItemDto> CreateNotification(Guid userId, NotificationChannelEnum channel,
+            int type, string title,
             string content)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
@@ -74,16 +84,26 @@ namespace CodeFam.Notification.Services
             };
             context.Notifications.Add(entity);
             await context.SaveChangesAsync();
+            await SendThirdPartyNotification(userId, channel, type, title, content);
             return new NotificationItemDto(entity.Id, entity.UserId, entity.Channel, entity.Type, entity.Title,
                 entity.Content, entity.IsRead, entity.ReadAt, entity.CreatedAt, entity.UpdatedAt);
         }
 
-        public async Task<bool> SendEmail(Guid userId, int channel, int type, string title, string content)
+        async Task SendThirdPartyNotification(Guid userId, NotificationChannelEnum channel, int type,
+            string title, string content)
         {
-            // TODO: get user email through user service
-            // TODO: use email package to send email
-            await using var context = await _contextFactory.CreateDbContextAsync();
-            return true;
+            if (channel == NotificationChannelEnum.Email)
+            {
+                //TODO: get user email by user service
+                var userEmail = "";
+                await _emailService.SendEmail(userEmail, title, content);
+            }
+            else if (channel == NotificationChannelEnum.Sms)
+            {
+                //TODO: get user phone by user service
+                var phoneNumber = "";
+                await _smsService.SendSms(phoneNumber, title, content);
+            }
         }
     }
 }
