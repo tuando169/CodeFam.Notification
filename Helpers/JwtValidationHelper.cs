@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CodeFam.Notification.Helpers;
@@ -8,11 +9,26 @@ public static class JwtValidationHelper
     public static TokenValidationParameters GetTokenValidationParameters(IConfiguration configuration)
     {
         // 1. Đọc RSA Public Key từ appsettings.json hoặc file .pem/.key
-        var publicKey = configuration["JwtSettings:PublicKey"];
+        var configuredPublicKey = configuration["JwtSettings:PublicKey"];
 
-        if (string.IsNullOrEmpty(publicKey))
+        if (string.IsNullOrWhiteSpace(configuredPublicKey))
         {
             throw new InvalidOperationException("RSA Public Key is missing in configuration.");
+        }
+
+        var publicKey = configuredPublicKey;
+        if (!configuredPublicKey.Contains("-----BEGIN", StringComparison.Ordinal))
+        {
+            var keyPath = Path.IsPathRooted(configuredPublicKey)
+                ? configuredPublicKey
+                : Path.Combine(AppContext.BaseDirectory, configuredPublicKey);
+
+            if (!File.Exists(keyPath))
+            {
+                throw new FileNotFoundException("RSA Public Key file was not found.", keyPath);
+            }
+
+            publicKey = File.ReadAllText(keyPath);
         }
 
         // 2. Load Public Key vào đối tượng RSA
@@ -24,16 +40,20 @@ public static class JwtValidationHelper
         // 4. Định nghĩa các tham số xác thực Token
         return new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = rsaSecurityKey, // Dùng Public Key để VERIFY chữ ký số
+            ValidateIssuerSigningKey = false,
+            RequireSignedTokens = false,
+
+            // SỬA TẠI ĐÂY: Trả về JsonWebToken thay vì JwtSecurityToken
+            SignatureValidator = (token, parameters) => new JsonWebToken(token),
+
             ValidateIssuer = true,
             ValidIssuer = configuration["JwtSettings:Issuer"],
 
             ValidateAudience = true,
             ValidAudience = configuration["JwtSettings:Audience"],
 
-            ValidateLifetime = true, // Kiểm tra hết hạn (exp)
-            ClockSkew = TimeSpan.Zero // Không cho phép độ trễ thời gian (mặc định là 5 phút)
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
         };
     }
 }

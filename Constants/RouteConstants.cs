@@ -6,9 +6,9 @@ public class RouteConstants
 
     public static class Notification
     {
-        public const string Base = Version + "/nofications";
+        public const string Base = Version + "/notifications";
         public const string GetAll = Base;
-        public const string Read = Base;
-        public const string ReadAll = Base + "/all";
+        public const string Read = Base + "/read";
+        public const string ReadAll = Read + "/all";
     }
 }
