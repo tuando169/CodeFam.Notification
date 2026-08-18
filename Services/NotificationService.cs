@@ -95,13 +95,13 @@ namespace CodeFam.Notification.Services
             if (channel == NotificationChannelEnum.Email)
             {
                 //TODO: get user email by user service
-                var userEmail = "";
-                await _emailService.SendEmail(userEmail, title, content);
+                var user = new { Name = "Do Dang Tuan", Email = "dodangtuan609@gmail.com" };
+                await _emailService.SendEmail(user.Name, user.Email, title, content);
             }
             else if (channel == NotificationChannelEnum.Sms)
             {
                 //TODO: get user phone by user service
-                var phoneNumber = "";
+                var phoneNumber = "0966135609";
                 await _smsService.SendSms(phoneNumber, title, content);
             }
         }
