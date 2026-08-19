@@ -4,8 +4,11 @@ using MimeKit;
 
 namespace CodeFam.Notification.Services.Email;
 
-public class EmailService : IEmailService
+public class EmailService(ILogger<EmailService> logger) : IEmailService
 {
+    private readonly ILogger<EmailService> _logger = logger;
+
+
     public async Task<bool> SendEmail(string userName, string userEmail, string title, string content)
     {
         var message = GenerateMail(userName, userEmail, title, content);
@@ -31,13 +34,19 @@ public class EmailService : IEmailService
 
     MimeMessage GenerateMail(string userName, string userEmail, string title, string content)
     {
+        _logger.LogInformation("Generate mail ${userName} ${userEmail} ${title} ${content}", userName, userEmail, title,
+            content);
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("CodeFam", "dodangtuan609@gmail.com"));
         message.To.Add(new MailboxAddress(userName, userEmail));
         message.Subject = title;
         var bodyBuilder = new BodyBuilder
         {
-            HtmlBody = "<h1>Xin chào!</h1><p>Đây là email tự động gửi từ <b>CodeFam</b>.</p>",
+            HtmlBody = $@"
+            <h1>Xin chào, {userName}!</h1>
+            <p>{content}</p>
+            <br/>
+            <p>Đây là email tự động gửi từ <b>CodeFam</b>.</p>",
             TextBody = content
         };
         message.Body = bodyBuilder.ToMessageBody();
