@@ -56,6 +56,15 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = JwtValidationHelper.GetTokenValidationParameters(builder.Configuration);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin() // Hoặc .WithOrigins("http://localhost:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddDbContextFactory<NotificationContext>(options => options.UseNpgsql(connectionString));
 
@@ -95,6 +104,7 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseCors("AllowAll");
 app.UseAuthentication(); // 1. Xác thực (Đọc và decode Token)
 app.UseAuthorization(); // 2. Phân quyền (Kiểm tra thẻ [Authorize])
 app.MapControllers();

@@ -46,11 +46,11 @@ public static class JwtValidationHelper
             // SỬA TẠI ĐÂY: Trả về JsonWebToken thay vì JwtSecurityToken
             SignatureValidator = (token, parameters) => new JsonWebToken(token),
 
-            ValidateIssuer = true,
-            ValidIssuer = configuration["JwtSettings:Issuer"],
+            ValidateIssuer = false,
+            // ValidIssuer = configuration["JwtSettings:Issuer"],
 
-            ValidateAudience = true,
-            ValidAudience = configuration["JwtSettings:Audience"],
+            ValidateAudience = false,
+            // ValidAudience = configuration["JwtSettings:Audience"],
 
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero

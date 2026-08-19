@@ -35,7 +35,7 @@ public class EmailService(ILogger<EmailService> logger) : IEmailService
     MimeMessage GenerateMail(string userName, string userEmail, string title, string content)
     {
         _logger.LogInformation("Generate mail ${userName} ${userEmail} ${title} ${content}", userName, userEmail, title,
-            content);
+            content); 
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("CodeFam", "dodangtuan609@gmail.com"));
         message.To.Add(new MailboxAddress(userName, userEmail));

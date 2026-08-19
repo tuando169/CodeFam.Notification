@@ -5,10 +5,11 @@
 // Define Default State values
 const DEFAULTS = {
   apiHost: 'http://localhost:3000',
-  pathList: '/api/notifications',
-  pathRead: '/api/notifications/{id}/read',
-  pathReadAll: '/api/notifications/read-all',
-  pathCreate: '/api/notifications'
+  apiToken: '',
+  pathList: '/api/v1/notifications',
+  pathRead: '/api/v1/notifications/{id}/read',
+  pathReadAll: '/api/v1/notifications/read-all',
+  pathCreate: '/api/v1/notifications'
 };
 
 // Database for Mock API (stored in LocalStorage)
@@ -176,8 +177,9 @@ function initDOM() {
     clearSystemNotifications: document.getElementById('clearSystemNotifications'),
     systemDropdownList: document.getElementById('systemDropdownList'),
     
-    // API Host Setting
+    // API Host & Token Setting
     apiHostInput: document.getElementById('apiHostInput'),
+    apiTokenInput: document.getElementById('apiTokenInput'),
     saveSettingsBtn: document.getElementById('saveSettingsBtn'),
     
     // Tabs
@@ -241,11 +243,22 @@ function initDOM() {
 
 // Populate saved config into UI
 function loadSettingsToUI() {
-  el.apiHostInput.value = state.settings.apiHost;
+  el.apiHostInput.value = state.settings.apiHost || '';
+  if (el.apiTokenInput) el.apiTokenInput.value = state.settings.apiToken || '';
   el.overrideListPath.value = state.settings.pathList;
   el.overrideReadPath.value = state.settings.pathRead;
   el.overrideReadAllPath.value = state.settings.pathReadAll;
   el.overrideCreatePath.value = state.settings.pathCreate;
+}
+
+// Helper to construct request headers including Authorization Token if present
+function getHeaders(extraHeaders = {}) {
+  const headers = { ...extraHeaders };
+  const token = el.apiTokenInput ? el.apiTokenInput.value.trim() : (state.settings.apiToken || '');
+  if (token) {
+    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+  }
+  return headers;
 }
 
 // Update Mock Mode UI State
@@ -293,12 +306,13 @@ function bindEvents() {
   el.saveSettingsBtn.addEventListener('click', () => {
     state.saveSettings({
       apiHost: el.apiHostInput.value.trim(),
+      apiToken: el.apiTokenInput ? el.apiTokenInput.value.trim() : '',
       pathList: el.overrideListPath.value.trim(),
       pathRead: el.overrideReadPath.value.trim(),
       pathReadAll: el.overrideReadAllPath.value.trim(),
       pathCreate: el.overrideCreatePath.value.trim()
     });
-    alert('Đã lưu cấu hình API link vào localStorage!');
+    alert('Đã lưu cấu hình API host & token vào localStorage!');
     logConsoleMessage('// Đã lưu cấu hình liên kết API.');
   });
 
@@ -524,7 +538,10 @@ async function handleGetList() {
   } else {
     // Real API Call
     try {
-      const response = await fetch(fullUrl, { method: 'GET' });
+      const response = await fetch(fullUrl, {
+        method: 'GET',
+        headers: getHeaders()
+      });
       const duration = Math.round(performance.now() - startTime);
       const json = await response.json();
       updateConsoleResponseMeta(response.status, duration, json);
@@ -595,7 +612,7 @@ async function handleReadNotification() {
     try {
       const response = await fetch(fullUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getHeaders({ 'Content-Type': 'application/json' })
       });
       const duration = Math.round(performance.now() - startTime);
       const json = await response.json();
@@ -632,7 +649,7 @@ async function handleReadAllNotifications() {
     try {
       const response = await fetch(fullUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getHeaders({ 'Content-Type': 'application/json' })
       });
       const duration = Math.round(performance.now() - startTime);
       const json = await response.json();
@@ -680,7 +697,7 @@ async function handleCreateNotification() {
     try {
       const response = await fetch(fullUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(parsedPayload)
       });
       const duration = Math.round(performance.now() - startTime);
